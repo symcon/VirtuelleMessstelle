@@ -1,0 +1,10 @@
+# VirtuelleMessstelle
+
+[![IP-Symcon is awesome!](https://img.shields.io/badge/IP--Symcon-5.5-blue.svg)](https://www.symcon.de)
+[![Check Style](https://github.com/symcon/VirtuelleMessstelle/workflows/Check%20Style/badge.svg)](https://github.com/symcon/VirtuelleMessstelle/actions)
+[![Run Tests](https://github.com/symcon/VirtuelleMessstelle/workflows/Run%20Tests/badge.svg)](https://github.com/symcon/VirtuelleMessstelle/actions)
+
+Folgende Module beinhaltet das VirtuelleMessstelle Repository:
+
+- __Virtuelle Messstelle__ ([Dokumentation](Virtuelle%20Messstelle))  
+	Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderungen einer Hauptvariable zusammen und addiert dieses mit dem Wert eine Variable. 

@@ -1,0 +1,13 @@
+{
+    "translations": {
+        "de": {
+            "Primary Measuring Point": "Primäre Messstelle",
+            "Secondary Measuring Points": "Sekundäre Messstellen",
+            "Variable": "Variable",
+            "Operation": "Operation",
+            "Add": "Addieren",
+            "Subtract": "Subtrahieren",
+            "Result": "Ergebnis"
+        }
+    }
+}

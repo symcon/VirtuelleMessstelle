@@ -1,0 +1,49 @@
+{
+    "elements": [
+        {
+            "type": "Select",
+            "caption": "Primary Measuring Point",
+            "name": "PrimaryPointID",
+            "width": "700px"
+        },
+        {
+            "type": "List",
+            "caption": "Secondary Measuring Points",
+            "name": "SecondaryPoints",
+            "add": true,
+            "delete": true,
+            "columns": [
+                {
+                    "caption": "Operation",
+                    "name": "Operation",
+                    "width": "150px",
+                    "add": 0,
+                    "edit": {
+                        "type": "Select",
+                        "options": [
+                            {
+                                "caption": "Add",
+                                "value": 0
+                            },
+                            {
+                                "caption": "Subtract",
+                                "value": 1
+                            }
+                        ],
+                        "width": "700px"
+                    }
+                },
+                {
+                    "caption": "Variable",
+                    "name": "VariableID",
+                    "width": "auto",
+                    "add": 0,
+                    "edit": {
+                        "type": "Select",
+                        "width": "700px"
+                    }
+                }
+            ]
+        }
+    ]
+}

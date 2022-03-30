@@ -1,0 +1,12 @@
+{
+    "id": "{3BA1D968-A160-9C01-CB21-FD09B154535A}",
+    "name": "Virtuelle Messstelle",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "VM",
+    "url": "https://www.symcon.de"
+}
