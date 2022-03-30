@@ -1,5 +1,5 @@
 # Virtuelle Messstelle
-Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderungen einer Hauptvariable zusammen und addiert dieses mit dem Wert eine Variable. 
+Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderungen einer Hauptvariable zusammen und addiert dieses mit dem Wert einer Variable. 
 
 ### Inhaltsverzeichnis
 
@@ -14,8 +14,8 @@ Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderung
 ### 1. Funktionsumfang
 
 * Auswahl einer geloggten Variable als primären Messstelle 
-* Auswahl beliebig vieler Variablen als Sekundären Messstellen
-* Einstellbar, ob die Veränderungen der Sekundären Messtellen zu den Veränderungen der Primären Messstellen addiert oder subtrahiert werden sollen
+* Auswahl beliebig vieler Variablen als sekundären Messstellen
+* Einstellbar, ob die Veränderungen der sekundären Messtellen zu den Veränderungen der primären Messstellen addiert oder subtrahiert werden sollen
 
 ### 2. Voraussetzungen
 
@@ -24,7 +24,7 @@ Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderung
 ### 3. Software-Installation
 
 * Über den Module Store das 'Virtuelle Messstelle'-Modul installieren.
-* Alternativ über das Module Control folgende URL hinzufügen
+* Alternativ über das Module Control folgende URL hinzufügen: https://github.com/symcon/VirtuelleMessstelle
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
@@ -33,12 +33,12 @@ Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderung
 
 __Konfigurationsseite__:
 
-Name                | Beschreibung
-------------------- | ------------------
-Primäre Messstelle  | Auswahl einer geloggten Variable
-Sekundäre Messstelle| Mehrfachauswahl von Variablen 
-Operation           | __Addieren/Subtrahieren__ Option, ob die positive Veränderung der sekundären Messstelle zu der primären Messstelle hinzugefügt oder abgezogen werden soll
-Variable            | Auswahl einer geloggte Variable als sekundäre Messstelle 
+Name                 | Beschreibung
+-------------------- | ------------------
+Primäre Messstelle   | Auswahl einer geloggten Variable
+Sekundäre Messstelle | Mehrfachauswahl von Variablen 
+Operation            | __Addieren/Subtrahieren__ Option, ob die positive Veränderung der sekundären Messstelle zu der primären Messstelle hinzugefügt oder abgezogen werden soll
+Variable             | Auswahl einer geloggte Variable als sekundäre Messstelle 
 
 ### 5. Statusvariablen und Profile
 
@@ -52,7 +52,7 @@ Ergebnis| Float | Errechnetes Ergebnis
 
 ### 7. PHP-Befehlsreferenz
 
-`boolean VM_Update(integer $InstanzID, float $primaryDelta);`
+`boolean VM_Update(integer $InstanzID, float $PrimaryDelta);`
 Die Steigung der sekundären Messstellen wird je nach ausgewählter Option addiert oder subtrahiert. Das Ergebnis wird mit dem übergebenen Wert zusammen auf den Wert der Variable 'Ergebnis' addiert. 
 
 Beispiel:
