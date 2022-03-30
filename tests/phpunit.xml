@@ -5,8 +5,6 @@
     </php>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">../CSVExport</directory>
-            <directory suffix=".php">../SyncMySQL</directory>
             <directory suffix=".php">../VirtuelleMessstelle</directory>
         </whitelist>
     </filter>
