@@ -8,5 +8,5 @@ _Das Modul „Smart Energy Box“ wurde in Kooperation mit der Hochschule Bibera
 
 Folgende Module beinhaltet das VirtuelleMessstelle Repository:
 
-- __Virtuelle Messstelle__ ([Dokumentation](Virtuelle%20Messstelle))  
+- __Virtuelle Messstelle__ ([Dokumentation](VirtuelleMessstelle))  
 	Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderungen einer Hauptvariable zusammen und addiert dieses mit dem Wert eine Variable. 
