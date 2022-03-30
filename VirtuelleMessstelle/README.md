@@ -24,7 +24,7 @@ Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderung
 ### 3. Software-Installation
 
 * Über den Module Store das 'Virtuelle Messstelle'-Modul installieren.
-* Alternativ über das Module Control folgende URL hinzufügen: https://github.com/symcon/VirtuelleMessstelle
+* Alternativ über das Module Control folgende URL hinzufügen: `https://github.com/symcon/VirtuelleMessstelle`
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
