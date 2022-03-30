@@ -53,25 +53,25 @@ class VirtuelleMessstelleBaseTest extends TestCase
         //Instances
         $archiveID = $this->ArchiveControlID;
         $instanceID = $this->VirtuelleMessstelle;
-    
+
         IPS_SetConfiguration($instanceID, json_encode(
             [
-            'PrimaryPointID' => $primary,
-            'SecondaryPoints' => json_encode([[
-                'Operation' => 1,
-                'VariableID' => $consumer1
-            ],[
-                'Operation' => 1,
-                'VariableID' => $consumer2
-            ]])
-        ]
+                'PrimaryPointID'  => $primary,
+                'SecondaryPoints' => json_encode([[
+                    'Operation'  => 1,
+                    'VariableID' => $consumer1
+                ], [
+                    'Operation'  => 1,
+                    'VariableID' => $consumer2
+                ]])
+            ]
         ));
         IPS_ApplyChanges($instanceID);
 
         IPS_EnableDebug($instanceID, 600);
 
         $this->assertEquals($primary, json_decode(IPS_GetConfiguration($instanceID), true)['PrimaryPointID']);
-        
+
         //Array = Upate runs
         //0 = Main Counter value (already the delta!)
         //1 = Consumer 1 Counter value (substract)
@@ -85,7 +85,7 @@ class VirtuelleMessstelleBaseTest extends TestCase
         ];
 
         //Run test matrix
-        for ($i = 0; $i < sizeof($tests); $i++) {
+        for ($i = 0; $i < count($tests); $i++) {
             SetValue($consumer1, GetValue($consumer1) + $tests[$i][1]);
             SetValue($consumer2, GetValue($consumer2) + $tests[$i][2]);
             VM_Update($instanceID, $tests[$i][0]);
