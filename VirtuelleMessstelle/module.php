@@ -82,7 +82,7 @@ class VirtuelleMessstelle extends IPSModule
         }
     }
 
-    public function Update(float $primaryDelta)
+    public function Update(float $PrimaryDelta)
     {
         $secondaryPoints = json_decode($this->ReadPropertyString('SecondaryPoints'), true);
 
@@ -130,9 +130,9 @@ class VirtuelleMessstelle extends IPSModule
         //Write updated values to attribute
         $this->WriteAttributeString('LastValues', json_encode($lastValues));
 
-        $this->SendDebug('Result', 'Primary Delta: ' . $primaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
+        $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
 
-        $this->SetValue('Result', $this->GetValue('Result') + ($primaryDelta + $secondaryChanges));
+        $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
     }
 
     public function GetConfigurationForm()
