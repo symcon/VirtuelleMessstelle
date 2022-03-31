@@ -139,12 +139,20 @@ class VirtuelleMessstelle extends IPSModule
     {
         //Add options to form
         $jsonForm = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        $options = $this->GetOptions();
-        $jsonForm['elements'][0]['options'] = $options;
-        $jsonForm['elements'][1]['columns'][1]['edit']['options'] = $options;
-        if (count($options) > 0) {
-            $jsonForm['elements'][1]['columns'][1]['add'] = $options[0]['value'];
+
+        //If the module "SyncMySQL" is install, get other options
+        if (IPS_ModuleExists('{7E122824-E4D6-4FF8-8AA1-2B7BB36D5EC9}')) {
+            $options = $this->GetOptions();
+            $jsonForm['elements'][0]['type'] = 'Select';
+            $jsonForm['elements'][0]['options'] = $options;
+
+            $jsonForm['elements'][1]['columns'][1]['edit']['type'] = 'Select';
+            $jsonForm['elements'][1]['columns'][1]['edit']['options'] = $options;
+            if (count($options) > 0) {
+                $jsonForm['elements'][1]['columns'][1]['add'] = $options[0]['value'];
+            }
         }
+
         return json_encode($jsonForm);
     }
 

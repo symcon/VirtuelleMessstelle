@@ -1,10 +1,11 @@
 {
     "elements": [
         {
-            "type": "Select",
+            "type": "SelectVariable",
             "caption": "Primary Measuring Point",
             "name": "PrimaryPointID",
-            "width": "700px"
+            "width": "700px",
+            "requiredLogging": 1
         },
         {
             "type": "List",
@@ -39,8 +40,8 @@
                     "width": "auto",
                     "add": 0,
                     "edit": {
-                        "type": "Select",
-                        "width": "700px"
+                        "type": "SelectVariable",
+                        "requiredLogging": 1
                     }
                 }
             ]
