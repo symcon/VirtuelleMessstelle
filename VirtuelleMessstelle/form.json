@@ -4,7 +4,6 @@
             "type": "SelectVariable",
             "caption": "Primary Measuring Point",
             "name": "PrimaryPointID",
-            "width": "700px",
             "requiredLogging": 1
         },
         {
