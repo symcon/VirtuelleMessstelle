@@ -150,6 +150,8 @@ class VirtuelleMessstelle extends IPSModule
 
             $jsonForm['elements'][1]['columns'][1]['edit']['type'] = 'Select';
             $jsonForm['elements'][1]['columns'][1]['edit']['options'] = $options;
+            $jsonForm['elements'][1]['columns'][0]['edit']['width'] = '700px';
+            $jsonForm['elements'][1]['columns'][1]['edit']['width'] = '700px';
             unset($jsonForm['elements'][1]['colums'][1]['edit']['requiredLogging']);
             if (count($options) > 0) {
                 $jsonForm['elements'][1]['columns'][1]['add'] = $options[0]['value'];
