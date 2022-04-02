@@ -8,14 +8,17 @@ class VirtuelleMessstelle extends IPSModule
         //Never delete this line!
         parent::Create();
 
-        //Archive might not always be available during startup
         $defaultPrimaryPointID = 0;
-        if (IPS_GetKernelRunlevel() == KR_READY) {
-            //Fetch from database
-            $options = $this->GetOptions();
-            if (count($options) > 0) {
-                $defaultPrimaryPointID = $options[0]['value'];
-            }
+        //If the module "SyncMySQL" is install, preselect the first
+        if (IPS_ModuleExists('{7E122824-E4D6-4FF8-8AA1-2B7BB36D5EC9}')) {
+            //Archive might not always be available during startup
+            if (IPS_GetKernelRunlevel() == KR_READY) {
+                //Fetch from database
+                $options = $this->GetOptions();
+                if (count($options) > 0) {
+                    $defaultPrimaryPointID = $options[0]['value'];
+                }
+            }    
         }
 
         //Properties
