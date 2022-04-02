@@ -18,7 +18,7 @@ class VirtuelleMessstelle extends IPSModule
                 if (count($options) > 0) {
                     $defaultPrimaryPointID = $options[0]['value'];
                 }
-            }    
+            }
         }
 
         //Properties
@@ -49,7 +49,7 @@ class VirtuelleMessstelle extends IPSModule
             $variable = IPS_GetVariable($primaryPointID);
             if ($variable['VariableType'] == VARIABLETYPE_FLOAT) {
                 $profile = ['VariableProfile'];
-            }    
+            }
         }
         $this->RegisterVariableFloat('Result', $this->Translate('Result'), $profile, 0);
 
