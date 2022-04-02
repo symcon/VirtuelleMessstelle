@@ -43,7 +43,10 @@ class VirtuelleMessstelle extends IPSModule
         //Update profile
         $profile = '';
         if (IPS_VariableExists($primaryPointID)) {
-            $profile = IPS_GetVariable($primaryPointID)['VariableProfile'];
+            $variable = IPS_GetVariable($primaryPointID);
+            if ($variable['VariableType'] == VARIABLETYPE_FLOAT) {
+                $profile = ['VariableProfile'];
+            }    
         }
         $this->RegisterVariableFloat('Result', $this->Translate('Result'), $profile, 0);
 
