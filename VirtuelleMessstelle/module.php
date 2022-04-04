@@ -48,10 +48,9 @@ class VirtuelleMessstelle extends IPSModule
         if (IPS_VariableExists($primaryPointID)) {
             $variable = IPS_GetVariable($primaryPointID);
             if ($variable['VariableType'] == VARIABLETYPE_FLOAT) {
-                if ($variable['VariableCustomProfile'] != "") {
+                if ($variable['VariableCustomProfile'] != '') {
                     $profile = $variable['VariableCustomProfile'];
-                }
-                else {
+                } else {
                     $profile = $variable['VariableProfile'];
                 }
             }
