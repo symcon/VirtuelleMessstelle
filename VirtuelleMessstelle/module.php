@@ -68,6 +68,14 @@ class VirtuelleMessstelle extends IPSModule
 
         //Register message for primary point
         $this->RegisterMessage($primaryPointID, VM_UPDATE);
+
+        $lastValues = json_decode($this->ReadAttributeString('LastValues'), true);
+        foreach ($secondaryPoints as $point) {
+            if (!array_key_exists($point['VariableID'], $lastValues)) {
+                $lastValues[$point['VariableID']] = GetValue($point['VariableID']);
+            }
+        }
+        $this->WriteAttributeString('LastValues', json_encode($lastValues));
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
@@ -131,6 +139,12 @@ class VirtuelleMessstelle extends IPSModule
         $this->WriteAttributeString('LastValues', json_encode($lastValues));
 
         $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
+
+        if ($secondaryChanges < 0) {
+            $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
+            echo $this->Translate('The secondary changes are negativ:' . $secondaryChanges . "\n");
+            $secondaryChanges = 0;
+        }
 
         $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
     }
