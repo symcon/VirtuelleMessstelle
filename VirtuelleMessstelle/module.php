@@ -24,6 +24,7 @@ class VirtuelleMessstelle extends IPSModule
 
         //Attributes
         $this->RegisterAttributeString('LastValues', '[]');
+        $this->RegisterAttributeFloat('LastNegativValue', 0);
     }
 
     public function Destroy()
@@ -134,18 +135,24 @@ class VirtuelleMessstelle extends IPSModule
 
             $this->SendDebug('Delta for ' . $point['VariableID'], strval($delta), 0);
         }
+        
+        if ($this->ReadAttributeFloat('LastNegativValue') != 0) {
+            $secondaryChanges -= $this->ReadAttributeFloat('LastNegativValue');
+            $this->WriteAttributeFloat('LastNegativValue', 0);
+        }
 
         //Write updated values to attribute
         $this->WriteAttributeString('LastValues', json_encode($lastValues));
 
         $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
 
-        if ($secondaryChanges < 0) {
-            echo $this->Translate('The secondary changes are negativ:' . $secondaryChanges . "\n");
-            $secondaryChanges = 0;
-        }
-
-        $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
+        if (($PrimaryDelta + $secondaryChanges) < 0) {
+            echo $this->Translate('The changes are negativ:' . $PrimaryDelta + $secondaryChanges . "\n");
+            $value = ($PrimaryDelta + $secondaryChanges) *-1; 
+            $this->WriteAttributeFloat('LastNegativValue', $value);
+        }else{
+            $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
+        }        
     }
 
     public function GetConfigurationForm()
