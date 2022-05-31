@@ -71,9 +71,9 @@ class VirtuelleMessstelleBaseTest extends TestCase
 
         SetValue($consumer1, 5);
         SetValue($consumer2, 3);
-        VM_Update($instanceID, 7);
+        VM_Update($instanceID, 9);
 
-        $this->assertEquals(7, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
+        $this->assertEquals(1, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
     }
 
     public function testBaseFunctionality()
@@ -112,10 +112,11 @@ class VirtuelleMessstelleBaseTest extends TestCase
         //2 = Consumer 2 Counter value (substract)
         //3 = Expected result
         $tests = [
-            [15, 5, 8, 15],
-            [5, 1, 2, 20],
-            [5, 2, 1, 25],
-            [10, 5, 0, 35]
+            [15, 5, 8, 2],
+            [5, 1, 2, 4],
+            [5, 2, 1, 6],
+            [4, 3, 5, 6],
+            [10, 5, 0, 7]
         ];
 
         //Run test matrix
