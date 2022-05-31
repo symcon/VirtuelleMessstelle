@@ -135,7 +135,7 @@ class VirtuelleMessstelle extends IPSModule
 
             $this->SendDebug('Delta for ' . $point['VariableID'], strval($delta), 0);
         }
-        
+
         if ($this->ReadAttributeFloat('LastNegativValue') != 0) {
             $secondaryChanges -= $this->ReadAttributeFloat('LastNegativValue');
             $this->WriteAttributeFloat('LastNegativValue', 0);
@@ -148,11 +148,11 @@ class VirtuelleMessstelle extends IPSModule
 
         if (($PrimaryDelta + $secondaryChanges) < 0) {
             echo $this->Translate('The changes are negativ:' . $PrimaryDelta + $secondaryChanges . "\n");
-            $value = ($PrimaryDelta + $secondaryChanges) *-1; 
+            $value = ($PrimaryDelta + $secondaryChanges) * -1;
             $this->WriteAttributeFloat('LastNegativValue', $value);
-        }else{
+        } else {
             $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
-        }        
+        }
     }
 
     public function GetConfigurationForm()
