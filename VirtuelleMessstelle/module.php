@@ -147,7 +147,7 @@ class VirtuelleMessstelle extends IPSModule
         $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
 
         if (($PrimaryDelta + $secondaryChanges) < 0) {
-            echo $this->Translate('The changes are negativ:' . ($PrimaryDelta + $secondaryChanges) . "\n");
+            $this->SendDebug($this->Translate('The changes are negative'), $this->Translate('The changes are negative') . ': ' . ($PrimaryDelta + $secondaryChanges) . "\n", 0);
             $value = ($PrimaryDelta + $secondaryChanges) * -1;
             $this->WriteAttributeFloat('LastNegativValue', $value);
         } else {
