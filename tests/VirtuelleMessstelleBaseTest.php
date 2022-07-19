@@ -43,6 +43,40 @@ class VirtuelleMessstelleBaseTest extends TestCase
         parent::setUp();
     }
 
+    public function testInitalDelta(Type $var = null)
+    {
+        //Set up the variables
+        //Variables
+        $consumer1 = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+        $consumer2 = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+        $primary = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+
+        //Instances
+        $archiveID = $this->ArchiveControlID;
+        $instanceID = $this->VirtuelleMessstelle;
+
+        IPS_SetConfiguration($instanceID, json_encode(
+            [
+                'PrimaryPointID'  => $primary,
+                'SecondaryPoints' => json_encode([[
+                    'Operation'  => 1,
+                    'VariableID' => $consumer1
+                ], [
+                    'Operation'  => 1,
+                    'VariableID' => $consumer2
+                ]])
+            ]
+        ));
+        IPS_ApplyChanges($instanceID);
+        IPS_EnableDebug($instanceID, 600);
+
+        SetValue($consumer1, 5);
+        SetValue($consumer2, 3);
+        VM_Update($instanceID, 9);
+
+        $this->assertEquals(1, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
+    }
+
     public function testBaseFunctionality()
     {
 
@@ -79,10 +113,11 @@ class VirtuelleMessstelleBaseTest extends TestCase
         //2 = Consumer 2 Counter value (substract)
         //3 = Expected result
         $tests = [
-            [15, 5, 8, 15],
-            [5, 1, 2, 17],
-            [5, 2, 1, 19],
-            [10, 5, 0, 24]
+            [15, 5, 8, 2],
+            [5, 1, 2, 4],
+            [5, 2, 1, 6],
+            [4, 3, 5, 6],
+            [10, 5, 0, 7]
         ];
 
         //Run test matrix

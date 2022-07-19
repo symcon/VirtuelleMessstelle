@@ -27,6 +27,7 @@ class VirtuelleMessstelle extends IPSModule
 
         //Attributes
         $this->RegisterAttributeString('LastValues', '[]');
+        $this->RegisterAttributeFloat('LastNegativValue', 0);
     }
 
     public function Destroy()
@@ -78,6 +79,14 @@ class VirtuelleMessstelle extends IPSModule
 
         //Register message for primary point
         $this->RegisterMessage($primaryPointID, VM_UPDATE);
+
+        $lastValues = json_decode($this->ReadAttributeString('LastValues'), true);
+        foreach ($secondaryPoints as $point) {
+            if (!array_key_exists($point['VariableID'], $lastValues)) {
+                $lastValues[$point['VariableID']] = GetValue($point['VariableID']);
+            }
+        }
+        $this->WriteAttributeString('LastValues', json_encode($lastValues));
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
@@ -137,12 +146,23 @@ class VirtuelleMessstelle extends IPSModule
             $this->SendDebug('Delta for ' . $point['VariableID'], strval($delta), 0);
         }
 
+        if ($this->ReadAttributeFloat('LastNegativValue') != 0) {
+            $secondaryChanges -= $this->ReadAttributeFloat('LastNegativValue');
+            $this->WriteAttributeFloat('LastNegativValue', 0);
+        }
+
         //Write updated values to attribute
         $this->WriteAttributeString('LastValues', json_encode($lastValues));
 
         $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
 
-        $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
+        if (($PrimaryDelta + $secondaryChanges) < 0) {
+            $this->SendDebug($this->Translate('The changes are negative'), $this->Translate('The changes are negative') . ': ' . ($PrimaryDelta + $secondaryChanges) . "\n", 0);
+            $value = ($PrimaryDelta + $secondaryChanges) * -1;
+            $this->WriteAttributeFloat('LastNegativValue', $value);
+        } else {
+            $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
+        }
     }
 
     public function GetConfigurationForm()
