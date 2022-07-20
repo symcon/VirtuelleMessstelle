@@ -129,6 +129,114 @@ class VirtuelleMessstelleBaseTest extends TestCase
         }
     }
 
+    public function testSyncPointsWithResult()
+    {
+        //Set up
+        //Variables
+        $consumer1 = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+        $consumer2 = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+        $primary = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+
+        //Instances
+        $archiveID = $this->ArchiveControlID;
+        $instanceID = $this->VirtuelleMessstelle;
+
+        //Set logging status
+        AC_SetLoggingStatus($archiveID, $consumer1, true);
+        AC_SetLoggingStatus($archiveID, $consumer2, true);
+        AC_SetLoggingStatus($archiveID, $primary, true);
+
+        IPS_SetConfiguration($instanceID, json_encode(
+            [
+                'StartDate'       => '{"year":2022,"month":1,"day":1}',
+                'PrimaryPointID'  => $primary,
+                'SecondaryPoints' => json_encode([[
+                    'Operation'  => 0,
+                    'VariableID' => $consumer1
+                ], [
+                    'Operation'  => 1,
+                    'VariableID' => $consumer2
+                ]])
+            ]
+        ));
+        IPS_ApplyChanges($instanceID);
+
+        IPS_EnableDebug($instanceID, 600);
+
+        $this->assertEquals($primary, json_decode(IPS_GetConfiguration($instanceID), true)['PrimaryPointID']);
+
+        //Set archiv data to the mesuring points
+        $primaryData = [
+            [
+                'Avg'       => 0,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 11:00:00'),
+            ],
+            [
+                'Avg'       => 11,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 12:00:00'),
+            ],
+        ];
+        AC_StubsAddAggregatedValues($archiveID, $primary, 0, $primaryData);
+
+        $consumer1Data = [
+            [
+                'Avg'       => 0,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 11:00:00'),
+            ],
+            [
+                'Avg'       => 12,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 12:00:00'),
+            ],
+        ];
+        AC_StubsAddAggregatedValues($archiveID, $consumer1, 0, $consumer1Data);
+
+        $consumer2Data = [
+            [
+                'Avg'       => 0,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 11:00:00'),
+            ],
+            [
+                'Avg'       => 11,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 12:00:00'),
+            ],
+        ];
+        AC_StubsAddAggregatedValues($archiveID, $consumer2, 0, $consumer2Data);
+
+        VM_SyncPointsWithResult($this->VirtuelleMessstelle, '{"year":2022,"month":1,"day":1}');
+
+        $this->assertEquals(12, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
+    }
+
     protected function CreateActionVariable(int $VariableType)
     {
         $variableID = IPS_CreateVariable($VariableType);
