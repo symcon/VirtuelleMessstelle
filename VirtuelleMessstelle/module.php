@@ -24,6 +24,7 @@ class VirtuelleMessstelle extends IPSModule
         //Properties
         $this->RegisterPropertyInteger('PrimaryPointID', $defaultPrimaryPointID);
         $this->RegisterPropertyString('SecondaryPoints', '[]');
+        $this->RegisterPropertyString('StartDate', '{"year":0,"month":0,"day":0}');
 
         //Attributes
         $this->RegisterAttributeString('LastValues', '[]');
@@ -189,6 +190,102 @@ class VirtuelleMessstelle extends IPSModule
         }
 
         return json_encode($jsonForm);
+    }
+
+    public function SyncPointsWithResult(string $startDate)
+    {
+        $archivID = IPS_GetInstanceListByModuleID('{43192F0B-135B-4CE7-A0A7-1475603F3060}')[0];
+
+        $startDate = json_decode($startDate, true);
+
+        //Look if the startDate is set
+        if ($startDate['year'] != 0) {
+            $startUnix = mktime(0, 0, 0, $startDate['month'], $startDate['day'], $startDate['year']);
+        } else {
+            echo "The date is not set.\n";
+            return;
+        }
+
+        //Look if the Result is logged
+        $resultID = $this->GetIDForIdent('Result');
+        if (AC_GetLoggingStatus($archivID, $resultID)) {
+            if (AC_GetAggregationType($archivID, $resultID) !== 1) {
+                AC_DeleteVariableData($archivID, $resultID, 0, 0);
+                AC_SetAggregationType($archivID, $resultID, 1);
+            }
+        } else {
+            AC_SetLoggingStatus($archivID, $resultID, true);
+            AC_SetAggregationType($archivID, $resultID, 1);
+        }
+
+        //Look if the Points are set
+        $primary = $this->ReadPropertyInteger('PrimaryPointID');
+        $secondaryPoints = json_decode($this->ReadPropertyString('SecondaryPoints'), true);
+
+        if ($primary >= 10000 && count($secondaryPoints) != 0) {
+            $primaryData = AC_GetAggregatedValues($archivID, $primary, 0, $startUnix, 0, 0);
+            $primaryData = array_reverse($primaryData);
+
+            $result = 0;
+            $negatives = 0;
+            foreach ($secondaryPoints as $key => $point) {
+                $secondaryPoints[$key]['lastValue'] = 0;
+            }
+
+            //Start Calculate
+            foreach ($primaryData as $entry) {
+                //Set the result
+                AC_AddLoggedValues($archivID, $resultID, [
+                    ['TimeStamp' => $entry['TimeStamp'], 'Value' => $result]
+                ]);
+
+                $PrimaryDelta = $entry['Avg'];
+                $secondaryChanges = 0;
+
+                foreach ($secondaryPoints as $key => $point) {
+                    $value = AC_GetAggregatedValues($archivID, $point['VariableID'], 0, $entry['TimeStamp'], ($entry['TimeStamp'] + 3600), 1)[0]['Avg'];
+                    $delta = 0;
+
+                    $delta = $value - $point['lastValue'];
+
+                    if ($delta < 0) {
+                        $delta = 0;
+                    }
+
+                    $secondaryPoints[$key]['lastValue'] = $value;
+
+                    // Set operator
+                    switch ($point['Operation']) {
+                        case 0:
+                            $secondaryChanges += $delta;
+                            break;
+                        case 1:
+                            $secondaryChanges -= $delta;
+                            break;
+                    }
+                }
+                if ($negatives != 0) {
+                    $secondaryChanges -= $negatives;
+                    $negatives = 0;
+                }
+
+                if (($PrimaryDelta + $secondaryChanges) < 0) {
+                    $negatives = ($PrimaryDelta + $secondaryChanges) * -1;
+                } else {
+                    $result += ($PrimaryDelta + $secondaryChanges);
+                }
+            }
+
+            //Set the value and the attributs for a clean next change
+            $this->SetValue('Result', $result);
+
+            $lastValues = json_decode($this->ReadAttributeString('LastValues'), true);
+            foreach ($secondaryPoints as $key => $value) {
+                $lastValues[$point['VariableID']] = $value['lastValue'];
+            }
+            $this->WriteAttributeString('LastValues', json_encode($lastValues));
+            $this->WriteAttributeFloat('LastNegativValue', $negatives);
+        }
     }
 
     //Get all logged variables as options
