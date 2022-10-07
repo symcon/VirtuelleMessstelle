@@ -237,6 +237,41 @@ class VirtuelleMessstelleBaseTest extends TestCase
         $this->assertEquals(12, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
     }
 
+    public function testResetPrimary()
+    {
+
+        //Variables
+        $primary = $this->CreateActionVariable(VARIABLETYPE_INTEGER);
+
+        //Instances
+        $instanceID = $this->VirtuelleMessstelle;
+
+        IPS_SetConfiguration($instanceID, json_encode(
+            [
+                'PrimaryPointID'  => $primary,
+                'SecondaryPoints' => json_encode([])
+            ]
+        ));
+        IPS_ApplyChanges($instanceID);
+
+        $this->assertEquals($primary, json_decode(IPS_GetConfiguration($instanceID), true)['PrimaryPointID']);
+
+        //Array = Upate runs
+        //0 = Main Counter value (already the delta!)
+        //3 = Expected result
+        $tests = [
+            [5, 5],
+            [-5, 5],
+            [3, 8],
+        ];
+
+        //Run test matrix
+        for ($i = 0; $i < count($tests); $i++) {
+            VM_Update($instanceID, $tests[$i][0]);
+            $this->assertEquals($tests[$i][1], GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
+        }
+    }
+
     protected function CreateActionVariable(int $VariableType)
     {
         $variableID = IPS_CreateVariable($VariableType);

@@ -104,6 +104,10 @@ class VirtuelleMessstelle extends IPSModule
 
     public function Update(float $PrimaryDelta)
     {
+        // Do not assume negative changes if the primary counter is reset
+        if ($PrimaryDelta < 0) {
+            $PrimaryDelta = 0;
+        }
         $secondaryPoints = json_decode($this->ReadPropertyString('SecondaryPoints'), true);
 
         //Do nothing if any participating variables are missing
