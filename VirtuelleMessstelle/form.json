@@ -1,21 +1,6 @@
 {
     "elements": [
         {
-            "type": "RowLayout",
-            "items": [
-                {
-                    "type": "SelectDate",
-                    "name": "StartDate",
-                    "caption": "Start Date"
-                },
-                {
-                    "type": "Button",
-                    "onClick": "VM_SyncPointsWithResult($id, $StartDate);",
-                    "caption": "Add past values"
-                }
-            ]
-        },
-        {
             "type": "SelectVariable",
             "caption": "Primary Measuring Point",
             "name": "PrimaryPointID",
@@ -56,6 +41,23 @@
                         "type": "SelectVariable",
                         "requiredLogging": 1
                     }
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "SelectDate",
+                    "name": "StartDate",
+                    "caption": "Start Date"
+                },
+                {
+                    "type": "Button",
+                    "onClick": "VM_SyncPointsWithResult($id, $StartDate);",
+                    "caption": "Add Past Values"
                 }
             ]
         }
