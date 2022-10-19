@@ -64,14 +64,14 @@
         },
         {
             "type": "ProgressBar",
-            "caption" : "",
+            "caption": "",
             "name": "progressBar",
             "visible": false,
             "indeterminate": true
         },
         {
             "type": "ProgressBar",
-            "caption" : "",
+            "caption": "",
             "name": "progressBarSections",
             "visible": true
         }
