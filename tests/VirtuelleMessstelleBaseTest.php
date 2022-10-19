@@ -140,7 +140,7 @@ class VirtuelleMessstelleBaseTest extends TestCase
         //Instances
         $archiveID = $this->ArchiveControlID;
         $instanceID = $this->VirtuelleMessstelle;
-        
+
         //Set logging status
         AC_SetLoggingStatus($archiveID, $consumer1, true);
         AC_SetLoggingStatus($archiveID, $consumer2, true);
@@ -271,8 +271,8 @@ class VirtuelleMessstelleBaseTest extends TestCase
         $this->assertEquals(16, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
 
         /**
-         * Schema: (previous set +) primary + consumer1 - consumer2 
-         * first set: 0 + 0 - 0 = 0 
+         * Schema: (previous set +) primary + consumer1 - consumer2
+         * first set: 0 + 0 - 0 = 0
          * second set: (0) + 11 + 12 - 10 = 13
          * third set: (13) + 5 + 3 - 5 = 16
          */
