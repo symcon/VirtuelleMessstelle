@@ -57,9 +57,23 @@
                 {
                     "type": "Button",
                     "onClick": "VM_SyncPointsWithResult($id, $StartDate);",
-                    "caption": "Add Past Values"
+                    "caption": "Add Past Values",
+                    "name": "syncButton"
                 }
             ]
+        },
+        {
+            "type": "ProgressBar",
+            "caption" : "",
+            "name": "progressBar",
+            "visible": false,
+            "indeterminate": true
+        },
+        {
+            "type": "ProgressBar",
+            "caption" : "",
+            "name": "progressBarSections",
+            "visible": true
         }
     ]
 }

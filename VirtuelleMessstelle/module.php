@@ -201,14 +201,24 @@ class VirtuelleMessstelle extends IPSModule
         $archivID = IPS_GetInstanceListByModuleID('{43192F0B-135B-4CE7-A0A7-1475603F3060}')[0];
 
         $startDate = json_decode($startDate, true);
-
         //Look if the startDate is set
         if ($startDate['year'] != 0) {
             $startUnix = mktime(0, 0, 0, $startDate['month'], $startDate['day'], $startDate['year']);
         } else {
-            echo "The date is not set.\n";
+            echo $this->Translate('The date is not set.');
             return;
         }
+
+        //Look how many potential dataset where are
+        $currentUnixTime = time();
+        $potentialDataSets = ceil(($currentUnixTime - $startUnix) / 3600);
+        $loops = ceil($potentialDataSets / 10000);
+        //var_dump($potentialDataSets, $loops);
+
+        $this->UpdateFormField('progressBar', 'visible', true);
+        $this->UpdateFormField('syncButton', 'enable', false);
+        $this->UpdateFormField('progressBarSections', 'maximum', $loops);
+        $this->UpdateFormField('progressBarSections', 'visible', true);
 
         //Look if the Result is logged
         $resultID = $this->GetIDForIdent('Result');
@@ -225,71 +235,124 @@ class VirtuelleMessstelle extends IPSModule
         //Look if the Points are set
         $primary = $this->ReadPropertyInteger('PrimaryPointID');
         $secondaryPoints = json_decode($this->ReadPropertyString('SecondaryPoints'), true);
+        foreach ($secondaryPoints as $key => $point) {
+            $secondaryPoints[$key]['lastValue'] = 0;
+        }
 
-        if ($primary >= 10000 && count($secondaryPoints) != 0) {
-            $primaryData = AC_GetAggregatedValues($archivID, $primary, 0, $startUnix, 0, 0);
-            $primaryData = array_reverse($primaryData);
-
+        if (IPS_VariableExists($primary) && count($secondaryPoints) != 0) {
             $result = 0;
             $negatives = 0;
-            foreach ($secondaryPoints as $key => $point) {
-                $secondaryPoints[$key]['lastValue'] = 0;
-            }
+            //Structure ['TimeStamp' => $entry['TimeStamp'], 'Value' => $result],
+            $resultLoggedValues = [];
+            //Structure ['VariableID' => [ Result of GetAggregatedValues ]],
+            $secondaryAggregatedValues = [];
+            $secondaryChanges = 0;
+            $endTime = 0;
+            //Split the periods in 10000 steps
+            for ($i = 0; $i < $loops; $i++) {
+                $endTime = $startUnix + 36000000; //endunix = startUnix + 10000 h
+                if ($endTime > $currentUnixTime) {
+                    $endTime = $currentUnixTime;
+                }
 
-            //Start Calculate
-            foreach ($primaryData as $entry) {
-                //Set the result
-                AC_AddLoggedValues($archivID, $resultID, [
-                    ['TimeStamp' => $entry['TimeStamp'], 'Value' => $result]
-                ]);
+                $primaryData = AC_GetAggregatedValues($archivID, $primary, 0, $startUnix, $endTime, 0);
+                if(count($primaryData) == 0){
+                    $startUnix = $endTime;
+                    continue;
+                }
+                //Revers we want to start with the oldest
+                $primaryData = array_reverse($primaryData);
+                $primaryFirstTimeStamp = $primaryData[0]['TimeStamp'];
 
-                $PrimaryDelta = $entry['Avg'];
-                $secondaryChanges = 0;
-
+                //Get the logged values of the secondary points of this
                 foreach ($secondaryPoints as $key => $point) {
-                    $value = AC_GetAggregatedValues($archivID, $point['VariableID'], 0, $entry['TimeStamp'], ($entry['TimeStamp'] + 3600), 1)[0]['Avg'];
-                    $delta = 0;
+                    $secondaryAggregatedValues[$point['VariableID']] = array_reverse(AC_GetAggregatedValues($archivID, $point['VariableID'], 0, $startUnix, $endTime, 0));
+                    //need the same count on data sets 
+                    $variableValues = $secondaryAggregatedValues[$point['VariableID']];
+                    while(abs($primaryFirstTimeStamp - $variableValues[0]['TimeStamp']) > 3600){ //The different between the timestamps are more than an hour
+                        if($primaryFirstTimeStamp < $variableValues[0]['TimeStamp']){ //true -> the secondary is younger
+                            array_unshift($variableValues,
+                            [
+                                'Avg'       => 0,
+                                'Duration'  => 1 * 60 * 60,
+                                'Max'       => 0,
+                                'MaxTime'   => 0,
+                                'Min'       => 0,
+                                'MinTime'   => 0,
+                                'TimeStamp' => strtotime('-1 hour', $variableValues[0]['TimeStamp']),
+                            ]);
+                        }else{
+                            $avg = array_shift($variableValues)['Avg'];
+                            $variableValues[0]['Avg'] = $variableValues[0]['Avg'] + $avg;
+                        }
+                    }
+                    $secondaryAggregatedValues[$point['VariableID']] = $variableValues;
+                }
 
-                    $delta = $value - $point['lastValue'];
+                //Start Calculate
+                foreach ($primaryData as $primaryKey => $entry) {
+                    //Set the result
+                    $resultLoggedValues[] = ['TimeStamp' => $entry['TimeStamp'], 'Value' => $result];
+                    $PrimaryDelta = $entry['Avg'];
+                    $secondaryChanges = 0;
 
-                    if ($delta < 0) {
-                        $delta = 0;
+                    foreach ($secondaryPoints as $key => $point) {
+                        $value = $secondaryAggregatedValues[$point['VariableID']][$primaryKey]['Avg'];
+
+                        // Set operator
+                        switch ($point['Operation']) {
+                            case 0:
+                                $secondaryChanges += $value;
+                                break;
+                            case 1:
+                                $secondaryChanges -= $value;
+                                break;
+                        }
                     }
 
-                    $secondaryPoints[$key]['lastValue'] = $value;
+                        if ($negatives != 0) {
+                            $secondaryChanges -= $negatives;
+                            $negatives = 0;
+                        }
 
-                    // Set operator
-                    switch ($point['Operation']) {
-                        case 0:
-                            $secondaryChanges += $delta;
-                            break;
-                        case 1:
-                            $secondaryChanges -= $delta;
-                            break;
-                    }
+                        if (($PrimaryDelta + $secondaryChanges) < 0) {
+                            $negatives = ($PrimaryDelta + $secondaryChanges) * -1;
+                        } else {
+                            $result += ($PrimaryDelta + $secondaryChanges);
+                        }
+                        $this->SendDebug('Result Past', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
+                    
                 }
-                if ($negatives != 0) {
-                    $secondaryChanges -= $negatives;
-                    $negatives = 0;
-                }
+                $this->SendDebug('Result', strval($result), 0);
+                AC_AddLoggedValues($archivID, $resultID, $resultLoggedValues);
+                $resultLoggedValues = [];
 
-                if (($PrimaryDelta + $secondaryChanges) < 0) {
-                    $negatives = ($PrimaryDelta + $secondaryChanges) * -1;
-                } else {
-                    $result += ($PrimaryDelta + $secondaryChanges);
-                }
+                $this->UpdateFormField('progressBarSections', 'current', $i);
+                $this->UpdateFormField('progressBarSections', 'caption', (($i / $loops) *100 ) . "%" );
+                $startUnix = $endTime;
             }
-
-            //Set the value and the attributs for a clean next change
-            $this->SetValue('Result', $result);
-
+            //Set the Attribute
             $lastValues = json_decode($this->ReadAttributeString('LastValues'), true);
-            foreach ($secondaryPoints as $key => $value) {
-                $lastValues[$point['VariableID']] = $value['lastValue'];
+            foreach ($secondaryPoints as $key => $point) {
+                if (count($secondaryAggregatedValues) > 0) {
+                    $lastValues[$point['VariableID']] = end($secondaryAggregatedValues[$point['VariableID']])['Avg'];
+                }
             }
             $this->WriteAttributeString('LastValues', json_encode($lastValues));
             $this->WriteAttributeFloat('LastNegativValue', $negatives);
+
+            if(IPS_GetVariable($primary)['VariableChanged'] > $currentUnixTime ){
+                $this->Update(end($primaryData)["Avg"] - GetValue($primary));
+            }else{
+                $this->SetValue('Result', $result );
+            }
         }
+
+        $this->UpdateFormField('progressBar', 'visible', false);
+        $this->UpdateFormField('syncButton', 'enable', true);
+        $this->UpdateFormField('progressBarSections', 'visible', false);
+
+        AC_ReAggregateVariable($archivID, $resultID);
     }
 
     //Get all logged variables as options

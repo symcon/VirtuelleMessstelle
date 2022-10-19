@@ -140,7 +140,7 @@ class VirtuelleMessstelleBaseTest extends TestCase
         //Instances
         $archiveID = $this->ArchiveControlID;
         $instanceID = $this->VirtuelleMessstelle;
-
+        
         //Set logging status
         AC_SetLoggingStatus($archiveID, $consumer1, true);
         AC_SetLoggingStatus($archiveID, $consumer2, true);
@@ -185,6 +185,15 @@ class VirtuelleMessstelleBaseTest extends TestCase
                 'MinTime'   => 0,
                 'TimeStamp' => strtotime('January 27 2022 12:00:00'),
             ],
+            [
+                'Avg'       => 5,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 13:00:00'),
+            ],
         ];
         AC_StubsAddAggregatedValues($archiveID, $primary, 0, $primaryData);
 
@@ -207,6 +216,15 @@ class VirtuelleMessstelleBaseTest extends TestCase
                 'MinTime'   => 0,
                 'TimeStamp' => strtotime('January 27 2022 12:00:00'),
             ],
+            [
+                'Avg'       => 3,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 13:00:00'),
+            ],
         ];
         AC_StubsAddAggregatedValues($archiveID, $consumer1, 0, $consumer1Data);
 
@@ -221,7 +239,7 @@ class VirtuelleMessstelleBaseTest extends TestCase
                 'TimeStamp' => strtotime('January 27 2022 11:00:00'),
             ],
             [
-                'Avg'       => 11,
+                'Avg'       => 10,
                 'Duration'  => 1 * 60 * 60,
                 'Max'       => 0,
                 'MaxTime'   => 0,
@@ -229,12 +247,35 @@ class VirtuelleMessstelleBaseTest extends TestCase
                 'MinTime'   => 0,
                 'TimeStamp' => strtotime('January 27 2022 12:00:00'),
             ],
+            [
+                'Avg'       => 5,
+                'Duration'  => 1 * 60 * 60,
+                'Max'       => 0,
+                'MaxTime'   => 0,
+                'Min'       => 0,
+                'MinTime'   => 0,
+                'TimeStamp' => strtotime('January 27 2022 13:00:00'),
+            ],
         ];
         AC_StubsAddAggregatedValues($archiveID, $consumer2, 0, $consumer2Data);
 
-        VM_SyncPointsWithResult($this->VirtuelleMessstelle, '{"year":2022,"month":1,"day":1}');
+        try {
+            VM_SyncPointsWithResult($this->VirtuelleMessstelle, '{"year":2020,"month":1,"day":1}');
+        } catch (\Throwable $th) {
+            //ReAggregation is the last step in the sync for the result Variable
+            if ($th->getMessage() != "'ReAggregateVariable' is not yet implemented") {
+                throw $th;
+            }
+        }
 
-        $this->assertEquals(12, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
+        $this->assertEquals(16, GetValue(IPS_GetObjectIDByIdent('Result', $instanceID)));
+
+        /**
+         * Schema: (previous set +) primary + consumer1 - consumer2 
+         * first set: 0 + 0 - 0 = 0 
+         * second set: (0) + 11 + 12 - 10 = 13
+         * third set: (13) + 5 + 3 - 5 = 16
+         */
     }
 
     public function testResetPrimary()
