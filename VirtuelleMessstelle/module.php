@@ -256,7 +256,7 @@ class VirtuelleMessstelle extends IPSModule
                 }
 
                 $primaryData = AC_GetAggregatedValues($archivID, $primary, 0, $startUnix, $endTime, 0);
-                if(count($primaryData) == 0){
+                if (count($primaryData) == 0) {
                     $startUnix = $endTime;
                     continue;
                 }
@@ -267,10 +267,10 @@ class VirtuelleMessstelle extends IPSModule
                 //Get the logged values of the secondary points of this
                 foreach ($secondaryPoints as $key => $point) {
                     $secondaryAggregatedValues[$point['VariableID']] = array_reverse(AC_GetAggregatedValues($archivID, $point['VariableID'], 0, $startUnix, $endTime, 0));
-                    //need the same count on data sets 
+                    //need the same count on data sets
                     $variableValues = $secondaryAggregatedValues[$point['VariableID']];
-                    while(abs($primaryFirstTimeStamp - $variableValues[0]['TimeStamp']) > 3600){ //The different between the timestamps are more than an hour
-                        if($primaryFirstTimeStamp < $variableValues[0]['TimeStamp']){ //true -> the secondary is younger
+                    while (abs($primaryFirstTimeStamp - $variableValues[0]['TimeStamp']) > 3600) { //The different between the timestamps are more than an hour
+                        if ($primaryFirstTimeStamp < $variableValues[0]['TimeStamp']) { //true -> the secondary is younger
                             array_unshift($variableValues,
                             [
                                 'Avg'       => 0,
@@ -281,7 +281,7 @@ class VirtuelleMessstelle extends IPSModule
                                 'MinTime'   => 0,
                                 'TimeStamp' => strtotime('-1 hour', $variableValues[0]['TimeStamp']),
                             ]);
-                        }else{
+                        } else {
                             $avg = array_shift($variableValues)['Avg'];
                             $variableValues[0]['Avg'] = $variableValues[0]['Avg'] + $avg;
                         }
@@ -310,25 +310,24 @@ class VirtuelleMessstelle extends IPSModule
                         }
                     }
 
-                        if ($negatives != 0) {
-                            $secondaryChanges -= $negatives;
-                            $negatives = 0;
-                        }
+                    if ($negatives != 0) {
+                        $secondaryChanges -= $negatives;
+                        $negatives = 0;
+                    }
 
-                        if (($PrimaryDelta + $secondaryChanges) < 0) {
-                            $negatives = ($PrimaryDelta + $secondaryChanges) * -1;
-                        } else {
-                            $result += ($PrimaryDelta + $secondaryChanges);
-                        }
-                        $this->SendDebug('Result Past', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
-                    
+                    if (($PrimaryDelta + $secondaryChanges) < 0) {
+                        $negatives = ($PrimaryDelta + $secondaryChanges) * -1;
+                    } else {
+                        $result += ($PrimaryDelta + $secondaryChanges);
+                    }
+                    $this->SendDebug('Result Past', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
                 }
                 $this->SendDebug('Result', strval($result), 0);
                 AC_AddLoggedValues($archivID, $resultID, $resultLoggedValues);
                 $resultLoggedValues = [];
 
                 $this->UpdateFormField('progressBarSections', 'current', $i);
-                $this->UpdateFormField('progressBarSections', 'caption', (($i / $loops) *100 ) . "%" );
+                $this->UpdateFormField('progressBarSections', 'caption', (($i / $loops) * 100) . '%');
                 $startUnix = $endTime;
             }
             //Set the Attribute
@@ -341,10 +340,10 @@ class VirtuelleMessstelle extends IPSModule
             $this->WriteAttributeString('LastValues', json_encode($lastValues));
             $this->WriteAttributeFloat('LastNegativValue', $negatives);
 
-            if(IPS_GetVariable($primary)['VariableChanged'] > $currentUnixTime ){
-                $this->Update(end($primaryData)["Avg"] - GetValue($primary));
-            }else{
-                $this->SetValue('Result', $result );
+            if (IPS_GetVariable($primary)['VariableChanged'] > $currentUnixTime) {
+                $this->Update(end($primaryData)['Avg'] - GetValue($primary));
+            } else {
+                $this->SetValue('Result', $result);
             }
         }
 
