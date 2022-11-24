@@ -1,5 +1,5 @@
 {
-    "status":[
+    "status": [
         {
             "code": 201,
             "icon": "error",
@@ -72,7 +72,7 @@
             "type": "RowLayout",
             "name": "resetLastValues",
             "visible": "false",
-            "items":[
+            "items": [
                 {
                     "type": "Label",
                     "caption": "Current negative value: "
