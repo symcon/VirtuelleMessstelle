@@ -1,4 +1,11 @@
 {
+    "status":[
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Multiply update with negative values"
+        }
+    ],
     "elements": [
         {
             "type": "SelectVariable",
@@ -58,6 +65,27 @@
                     "type": "Button",
                     "onClick": "VM_SyncPointsWithResult($id, $StartDate);",
                     "caption": "Add Past Values"
+                }
+            ]
+        },
+        {
+            "type": "RowLayout",
+            "name": "resetLastValues",
+            "visible": "false",
+            "items":[
+                {
+                    "type": "Label",
+                    "caption": "Current negative value: "
+                },
+                {
+                    "type": "Label",
+                    "name": "currentNegativeValue",
+                    "caption": "NAN"
+                },
+                {
+                    "type": "Button",
+                    "onClick": "VM_ResetLastNegativeValues($id);",
+                    "caption": "Reset negative values"
                 }
             ]
         }

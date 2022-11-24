@@ -10,7 +10,10 @@
             "Result": "Ergebnis",
             "The changes are negative": "Die Änderungen sind negativ",
             "Start Date": "Startdatum",
-            "Add Past Values": "Füge vergangene Werte hinzu"
+            "Add Past Values": "Füge vergangene Werte hinzu",
+            "Current negative value: ": "Momentaner negativer Wert",
+            "Reset negative values": "Zurücksetzen des negativen Wertes",
+            "Multiply update with negative values": "Mehrfache Updates mit negativen Wert"
         }
     }
 }

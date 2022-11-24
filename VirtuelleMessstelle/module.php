@@ -29,6 +29,7 @@ class VirtuelleMessstelle extends IPSModule
         //Attributes
         $this->RegisterAttributeString('LastValues', '[]');
         $this->RegisterAttributeFloat('LastNegativValue', 0);
+        $this->RegisterAttributeInteger('LastNegativeValueUpdate',0);
     }
 
     public function Destroy()
@@ -165,8 +166,32 @@ class VirtuelleMessstelle extends IPSModule
             $this->SendDebug($this->Translate('The changes are negative'), $this->Translate('The changes are negative') . ': ' . ($PrimaryDelta + $secondaryChanges) . "\n", 0);
             $value = ($PrimaryDelta + $secondaryChanges) * -1;
             $this->WriteAttributeFloat('LastNegativValue', $value);
+
+            $this->WriteAttributeInteger('LastNegativeValueUpdate', $this->ReadAttributeInteger('LastNegativeValueUpdate') +1);
+            $this->negativeValuesUpdate($this->ReadAttributeInteger('LastNegativeValueUpdate'));
         } else {
             $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
+            
+        }
+    }
+
+    public function ResetLastNegativeValues()
+    {
+        $this->WriteAttributeFloat('LastNegativValue', 0);
+        $this->WriteAttributeInteger('LastNegativeValueUpdate', 0);
+        $this->negativeValuesUpdate(0);
+    }
+
+    private function negativeValuesUpdate(int $update)
+    {
+        if($update > 10){
+            $this->UpdateFormField("resetLastValues", "visible", true);
+            $this->UpdateFormField("currentNegativeValue", "caption", $this->ReadAttributeFloat('LastNegativValue'));
+            $this->SetStatus(201);
+        }else{
+            $this->SetStatus(102);
+            $this->UpdateFormField('currentNegativeValue', 'caption', 'NAN');
+            $this->UpdateFormField("resetLastValues", "visible", false);
         }
     }
 
@@ -193,6 +218,12 @@ class VirtuelleMessstelle extends IPSModule
             }
         }
 
+        if($this->ReadAttributeInteger('LastNegativeValueUpdate') > 10){
+            $jsonForm['actions'][1]['visible'] = true;
+            $jsonForm['actions'][1]['items'][1]['caption'] = $this->ReadAttributeFloat('LastNegativValue');
+        }else {
+            $jsonForm['actions'][1]['visible'] = false;
+        }
         return json_encode($jsonForm);
     }
 
