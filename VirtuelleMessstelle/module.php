@@ -212,7 +212,6 @@ class VirtuelleMessstelle extends IPSModule
         //Look if the Result is logged as counter
         $resultID = $this->GetIDForIdent('Result');
         if (!AC_GetLoggingStatus($archivID, $resultID) || AC_GetAggregationType($archivID, $resultID) !== 1) {
-
             AC_SetLoggingStatus($archivID, $resultID, true);
             AC_SetAggregationType($archivID, $resultID, 1);
 
@@ -220,7 +219,7 @@ class VirtuelleMessstelle extends IPSModule
                 AC_DeleteVariableData($archivID, $resultID, 0, 0);
             } else {
                 //Delete to prevent from zeros
-                AC_DeleteVariableData($archivID, $resultID, time(), 0); 
+                AC_DeleteVariableData($archivID, $resultID, time(), 0);
             }
         }
 
