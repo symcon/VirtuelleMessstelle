@@ -55,12 +55,27 @@
                     "caption": "Start Date"
                 },
                 {
-                    "type": "Button",
-                    "onClick": "VM_SyncPointsWithResult($id, $StartDate);",
-                    "caption": "Add Past Values",
-                    "name": "syncButton"
+                    "type": "Select",
+                    "caption": "Strategy for past values",
+                    "name": "PastValueStrategy",
+                    "options": [
+                        {
+                            "caption": "Add values till first logged",
+                            "value": "FirstLogged"
+                        },
+                        {
+                            "caption": "Add values till now",
+                            "value": "Full"
+                        }
+                    ]
                 }
             ]
+        },
+        {
+            "type": "Button",
+            "onClick": "VM_SyncPointsWithResult($id, $StartDate, $PastValueStrategy);",
+            "caption": "Add Past Values",
+            "name": "syncButton"
         },
         {
             "type": "ProgressBar",
@@ -73,7 +88,7 @@
             "type": "ProgressBar",
             "caption": "",
             "name": "progressBarSections",
-            "visible": true
+            "visible": false
         }
     ]
 }

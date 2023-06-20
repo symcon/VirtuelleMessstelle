@@ -196,7 +196,7 @@ class VirtuelleMessstelle extends IPSModule
         return json_encode($jsonForm);
     }
 
-    public function SyncPointsWithResult(string $startDate)
+    public function SyncPointsWithResult(string $startDate, string $strategy)
     {
         $archivID = IPS_GetInstanceListByModuleID('{43192F0B-135B-4CE7-A0A7-1475603F3060}')[0];
 
@@ -209,27 +209,45 @@ class VirtuelleMessstelle extends IPSModule
             return;
         }
 
+        //Look if the Result is logged as counter
+        $resultID = $this->GetIDForIdent('Result');
+        if (!AC_GetLoggingStatus($archivID, $resultID) || AC_GetAggregationType($archivID, $resultID) !== 1) {
+
+            AC_SetLoggingStatus($archivID, $resultID, true);
+            AC_SetAggregationType($archivID, $resultID, 1);
+
+            if (AC_GetAggregationType($archivID, $resultID) !== 1) {
+                AC_DeleteVariableData($archivID, $resultID, 0, 0);
+            } else {
+                //Delete to prevent from zeros
+                AC_DeleteVariableData($archivID, $resultID, time(), 0); 
+            }
+        }
+
         //Look how many potential dataset where are
-        $currentUnixTime = time();
+        switch ($strategy) {
+            case 'FirstLogged':
+                $archiveVariables = AC_GetAggregationVariables($archivID, true);
+                $key = array_search($resultID, array_column($archiveVariables, 'VariableID'));
+                $currentUnixTime = $archiveVariables[$key]['FirstTime'] === 0 ? time() : $archiveVariables[$key]['FirstTime'];
+                break;
+            case 'Full':
+            default:
+                $currentUnixTime = time();
+                break;
+        }
+
         $potentialDataSets = ceil(($currentUnixTime - $startUnix) / 3600);
         $loops = ceil($potentialDataSets / 10000);
-        //var_dump($potentialDataSets, $loops);
+
+        $this->SendDebug('Count of Datasets', strval($potentialDataSets), 0);
+        $this->SendDebug('Count of Loops', strval($loops), 0);
 
         $this->UpdateFormField('progressBar', 'visible', true);
         $this->UpdateFormField('syncButton', 'enable', false);
-        $this->UpdateFormField('progressBarSections', 'maximum', $loops);
-        $this->UpdateFormField('progressBarSections', 'visible', true);
-
-        //Look if the Result is logged
-        $resultID = $this->GetIDForIdent('Result');
-        if (AC_GetLoggingStatus($archivID, $resultID)) {
-            if (AC_GetAggregationType($archivID, $resultID) !== 1) {
-                AC_DeleteVariableData($archivID, $resultID, 0, 0);
-                AC_SetAggregationType($archivID, $resultID, 1);
-            }
-        } else {
-            AC_SetLoggingStatus($archivID, $resultID, true);
-            AC_SetAggregationType($archivID, $resultID, 1);
+        if ($loops > 1) {
+            $this->UpdateFormField('progressBarSections', 'maximum', $loops);
+            $this->UpdateFormField('progressBarSections', 'visible', true);
         }
 
         //Look if the Points are set
@@ -320,7 +338,10 @@ class VirtuelleMessstelle extends IPSModule
                     } else {
                         $result += ($PrimaryDelta + $secondaryChanges);
                     }
-                    $this->SendDebug('Result Past', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
+                    $this->SendDebug('Date', date('H:i:s d.m.Y', $entry['TimeStamp']), 0);
+                    $this->SendDebug('Delta And Changes', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
+                    $this->SendDebug('Negatives', strval($negatives), 0);
+                    $this->SendDebug('Result Past', strval($result), 0);
                 }
                 $this->SendDebug('Result', strval($result), 0);
                 AC_AddLoggedValues($archivID, $resultID, $resultLoggedValues);
@@ -343,7 +364,15 @@ class VirtuelleMessstelle extends IPSModule
             if (IPS_GetVariable($primary)['VariableChanged'] > $currentUnixTime) {
                 $this->Update(end($primaryData)['Avg'] - GetValue($primary));
             } else {
-                $this->SetValue('Result', $result);
+                switch ($strategy) {
+                    case 'FirstLogged':
+                        # Not nesseccary to set
+                        break;
+                    case 'Full':
+                    default:
+                        $this->SetValue('Result', $result);
+                        break;
+                }
             }
         }
 

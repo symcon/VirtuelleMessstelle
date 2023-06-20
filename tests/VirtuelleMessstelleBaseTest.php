@@ -260,7 +260,7 @@ class VirtuelleMessstelleBaseTest extends TestCase
         AC_StubsAddAggregatedValues($archiveID, $consumer2, 0, $consumer2Data);
 
         try {
-            VM_SyncPointsWithResult($this->VirtuelleMessstelle, '{"year":2020,"month":1,"day":1}');
+            VM_SyncPointsWithResult($this->VirtuelleMessstelle, '{"year":2020,"month":1,"day":1}', 'Full');
         } catch (\Throwable $th) {
             //ReAggregation is the last step in the sync for the result Variable
             if ($th->getMessage() != "'ReAggregateVariable' is not yet implemented") {

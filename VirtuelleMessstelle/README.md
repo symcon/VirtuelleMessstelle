@@ -40,6 +40,13 @@ Sekundäre Messstelle | Mehrfachauswahl von Variablen
 Operation            | __Addieren/Subtrahieren__ Option, ob die positive Veränderung der sekundären Messstelle zu der primären Messstelle hinzugefügt oder abgezogen werden soll
 Variable             | Auswahl einer geloggte Variable als sekundäre Messstelle 
 
+Aktionsbereich:
+
+Name                           | Beschreibung 
+------------------------------ | --------------
+Startdatum                     | Datum von wenn die Werte berechnet werden sollen 
+Strategie für vergangene Werte | Werte nur bis zum ersten geloggten Wert oder von Anfang an bis jetzt
+
 ### 5. Statusvariablen und Profile
 
 Die Statusvariablen/Kategorien werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
