@@ -3,7 +3,7 @@
         {
             "code": 201,
             "icon": "error",
-            "caption": "Multiply update with negative values"
+            "caption": "Multiple updates with negative values"
         }
     ],
     "elements": [
@@ -85,7 +85,7 @@
                 {
                     "type": "Button",
                     "onClick": "VM_ResetLastNegativeValues($id);",
-                    "caption": "Reset negative values"
+                    "caption": "Reset error state"
                 }
             ]
         }

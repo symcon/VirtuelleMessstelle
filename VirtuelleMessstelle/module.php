@@ -29,7 +29,7 @@ class VirtuelleMessstelle extends IPSModule
         //Attributes
         $this->RegisterAttributeString('LastValues', '[]');
         $this->RegisterAttributeFloat('LastNegativValue', 0);
-        $this->RegisterAttributeInteger('LastNegativeValueUpdate', 0);
+        $this->RegisterAttributeInteger('LastNegativCounter', 0);
     }
 
     public function Destroy()
@@ -163,16 +163,16 @@ class VirtuelleMessstelle extends IPSModule
         $this->SendDebug('Result', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
 
         if (($PrimaryDelta + $secondaryChanges) < 0) {
-            $this->SendDebug($this->Translate('The changes are negative'), $this->Translate('The changes are negative') . ': ' . ($PrimaryDelta + $secondaryChanges) . "\n", 0);
             $value = ($PrimaryDelta + $secondaryChanges) * -1;
             $this->WriteAttributeFloat('LastNegativValue', $value);
 
-            $this->WriteAttributeInteger('LastNegativeValueUpdate', $this->ReadAttributeInteger('LastNegativeValueUpdate') + 1);
-            $this->negativeValuesUpdate($this->ReadAttributeInteger('LastNegativeValueUpdate'));
+            $this->SendDebug('Warning', sprintf("%d consecutive values where negative", $this->ReadAttributeInteger('LastNegativCounter')), 0);
+            $this->WriteAttributeInteger('LastNegativCounter', $this->ReadAttributeInteger('LastNegativCounter') + 1);
+            $this->negativeValuesUpdate($this->ReadAttributeInteger('LastNegativCounter'));
         } else {
             $this->SetValue('Result', $this->GetValue('Result') + ($PrimaryDelta + $secondaryChanges));
-            if ($this->ReadAttributeInteger('LastNegativeValueUpdate') != 0) {
-                $this->WriteAttributeInteger('LastNegativeValueUpdate', 0);
+            if ($this->ReadAttributeInteger('LastNegativCounter') != 0) {
+                $this->WriteAttributeInteger('LastNegativCounter', 0);
                 $this->negativeValuesUpdate(0);
             }
         }
@@ -181,7 +181,7 @@ class VirtuelleMessstelle extends IPSModule
     public function ResetLastNegativeValues()
     {
         $this->WriteAttributeFloat('LastNegativValue', 0);
-        $this->WriteAttributeInteger('LastNegativeValueUpdate', 0);
+        $this->WriteAttributeInteger('LastNegativCounter', 0);
         $this->negativeValuesUpdate(0);
     }
 
@@ -208,9 +208,9 @@ class VirtuelleMessstelle extends IPSModule
             }
         }
 
-        if ($this->ReadAttributeInteger('LastNegativeValueUpdate') > 10) {
+        if ($this->ReadAttributeInteger('LastNegativCounter') > 10) {
             $jsonForm['actions'][1]['visible'] = true;
-            $jsonForm['actions'][1]['items'][1]['caption'] = $this->ReadAttributeFloat('LastNegativValue');
+            $jsonForm['actions'][1]['items'][1]['caption'] = -$this->ReadAttributeFloat('LastNegativValue');
         } else {
             $jsonForm['actions'][1]['visible'] = false;
         }
@@ -317,7 +317,7 @@ class VirtuelleMessstelle extends IPSModule
     {
         if ($update > 10) {
             $this->UpdateFormField('resetLastValues', 'visible', true);
-            $this->UpdateFormField('currentNegativeValue', 'caption', $this->ReadAttributeFloat('LastNegativValue'));
+            $this->UpdateFormField('currentNegativeValue', 'caption', -$this->ReadAttributeFloat('LastNegativValue'));
             $this->SetStatus(201);
         } else {
             $this->SetStatus(102);
