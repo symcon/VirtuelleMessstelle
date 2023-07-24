@@ -214,13 +214,6 @@ class VirtuelleMessstelle extends IPSModule
         if (!AC_GetLoggingStatus($archivID, $resultID) || AC_GetAggregationType($archivID, $resultID) !== 1) {
             AC_SetLoggingStatus($archivID, $resultID, true);
             AC_SetAggregationType($archivID, $resultID, 1);
-
-            if (AC_GetAggregationType($archivID, $resultID) !== 1) {
-                AC_DeleteVariableData($archivID, $resultID, 0, 0);
-            } else {
-                //Delete to prevent from zeros
-                AC_DeleteVariableData($archivID, $resultID, time(), 0);
-            }
         }
 
         //Look how many potential dataset where are
@@ -228,11 +221,12 @@ class VirtuelleMessstelle extends IPSModule
             case 'FirstLogged':
                 $archiveVariables = AC_GetAggregationVariables($archivID, true);
                 $key = array_search($resultID, array_column($archiveVariables, 'VariableID'));
-                $currentUnixTime = $archiveVariables[$key]['FirstTime'] === 0 ? time() : $archiveVariables[$key]['FirstTime'];
+                $currentUnixTime = $archiveVariables[$key]['FirstTime'] === 0 ? time() : $archiveVariables[$key]['FirstTime'] - 1;
                 break;
             case 'Full':
             default:
                 $currentUnixTime = time();
+                AC_DeleteVariableData($archivID, $resultID, 0, $currentUnixTime);
                 break;
         }
 
@@ -286,9 +280,9 @@ class VirtuelleMessstelle extends IPSModule
                     $secondaryAggregatedValues[$point['VariableID']] = array_reverse(AC_GetAggregatedValues($archivID, $point['VariableID'], 0, $startUnix, $endTime, 0));
                     //need the same count on data sets
                     $variableValues = $secondaryAggregatedValues[$point['VariableID']];
-                    while (abs($primaryFirstTimeStamp - $variableValues[0]['TimeStamp']) > 3600) { //The different between the timestamps are more than an hour
-                        if ($primaryFirstTimeStamp < $variableValues[0]['TimeStamp']) { //true -> the secondary is younger
-                            array_unshift($variableValues,
+                    while (floor($primaryFirstTimeStamp / 3600) < floor($variableValues[0]['TimeStamp'] / 3600)) { //The different between the timestamps are more than an hour
+                        $this->SendDebug('Prepare Secondary', 'Need to adjust set');
+                        array_unshift($variableValues,
                             [
                                 'Avg'       => 0,
                                 'Duration'  => 1 * 60 * 60,
@@ -298,18 +292,18 @@ class VirtuelleMessstelle extends IPSModule
                                 'MinTime'   => 0,
                                 'TimeStamp' => strtotime('-1 hour', $variableValues[0]['TimeStamp']),
                             ]);
-                        } else {
-                            $avg = array_shift($variableValues)['Avg'];
-                            $variableValues[0]['Avg'] = $variableValues[0]['Avg'] + $avg;
-                        }
                     }
                     $secondaryAggregatedValues[$point['VariableID']] = $variableValues;
                 }
 
                 //Start Calculate
                 foreach ($primaryData as $primaryKey => $entry) {
+                    // Always start at 0, so we can properly log the increase, should there be previous values, this is a counter reset
+                    if (($i === 0) && ($primaryKey === 0)) {
+                        $resultLoggedValues[] = ['TimeStamp' => $entry['TimeStamp'], 'Value' => 0];
+                    }
+
                     //Set the result
-                    $resultLoggedValues[] = ['TimeStamp' => $entry['TimeStamp'], 'Value' => $result];
                     $PrimaryDelta = $entry['Avg'];
                     $secondaryChanges = 0;
 
@@ -337,6 +331,7 @@ class VirtuelleMessstelle extends IPSModule
                     } else {
                         $result += ($PrimaryDelta + $secondaryChanges);
                     }
+                    $resultLoggedValues[] = ['TimeStamp' => $entry['TimeStamp'], 'Value' => $result];
                     $this->SendDebug('Date', date('H:i:s d.m.Y', $entry['TimeStamp']), 0);
                     $this->SendDebug('Delta And Changes', 'Primary Delta: ' . $PrimaryDelta . ', Secondary Changes: ' . $secondaryChanges, 0);
                     $this->SendDebug('Negatives', strval($negatives), 0);
@@ -360,18 +355,14 @@ class VirtuelleMessstelle extends IPSModule
             $this->WriteAttributeString('LastValues', json_encode($lastValues));
             $this->WriteAttributeFloat('LastNegativValue', $negatives);
 
-            if (IPS_GetVariable($primary)['VariableChanged'] > $currentUnixTime) {
-                $this->Update(end($primaryData)['Avg'] - GetValue($primary));
-            } else {
-                switch ($strategy) {
-                    case 'FirstLogged':
-                        # Not nesseccary to set
-                        break;
-                    case 'Full':
-                    default:
-                        $this->SetValue('Result', $result);
-                        break;
-                }
+            switch ($strategy) {
+                case 'FirstLogged':
+                    # Not nesseccary to set
+                    break;
+                case 'Full':
+                default:
+                    $this->SetValue('Result', $result);
+                    break;
             }
         }
 
