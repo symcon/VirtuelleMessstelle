@@ -166,7 +166,7 @@ class VirtuelleMessstelle extends IPSModule
             $value = ($PrimaryDelta + $secondaryChanges) * -1;
             $this->WriteAttributeFloat('LastNegativValue', $value);
 
-            $this->SendDebug('Warning', sprintf("%d consecutive values where negative", $this->ReadAttributeInteger('LastNegativCounter')), 0);
+            $this->SendDebug('Warning', sprintf('%d consecutive values where negative', $this->ReadAttributeInteger('LastNegativCounter')), 0);
             $this->WriteAttributeInteger('LastNegativCounter', $this->ReadAttributeInteger('LastNegativCounter') + 1);
             $this->negativeValuesUpdate($this->ReadAttributeInteger('LastNegativCounter'));
         } else {
