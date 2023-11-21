@@ -337,7 +337,8 @@ class VirtuelleMessstelle extends IPSModule
             }
         }
 
-        $addIdentifier = function ($variableID) use ($idents) {
+        $addIdentifier = function ($variableID) use ($idents)
+        {
             foreach ($idents as $ident) {
                 if ($ident['variableid'] == $variableID) {
                     return $ident['ident'];
@@ -360,7 +361,8 @@ class VirtuelleMessstelle extends IPSModule
                 }
             }
         }
-        usort($options, function ($a, $b) {
+        usort($options, function ($a, $b)
+        {
             return strcmp($a['caption'], $b['caption']);
         });
         return $options;
