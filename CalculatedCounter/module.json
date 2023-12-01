@@ -1,6 +1,6 @@
 {
     "id": "{3BA1D968-A160-9C01-CB21-FD09B154535A}",
-    "name": "Virtuelle Messstelle",
+    "name": "Calculated Counter",
     "type": 3,
     "vendor": "",
     "aliases": [],
@@ -8,5 +8,5 @@
     "childRequirements": [],
     "implemented": [],
     "prefix": "VM",
-    "url": "https://www.symcon.de"
+    "url": "https://www.symcon.de/en/service/documentation/module-reference/calculated-counter/"
 }
