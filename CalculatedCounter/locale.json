@@ -12,7 +12,9 @@
             "Add Past Values": "Füge vergangene Werte hinzu",
             "Current negative value: ": "Momentaner negativer Wert",
             "Reset error state": "Fehlerzustand zurücksetzen",
-            "Multiple updates with negative values": "Mehrfache Updates mit negativen Wert"
+            "Multiple updates with negative values": "Mehrfache Updates mit negativen Wert",
+            "https://www.symcon.de/en/service/documentation/module-reference/calculated-counter/": "https://www.symcon.de/de/service/dokumentation/modulreferenz/virtuellemessstelle/",
+            "Calculated Counter": "Virtuelle Messstelle"
         }
     }
 }

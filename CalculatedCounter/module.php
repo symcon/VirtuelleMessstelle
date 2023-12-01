@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-class VirtuelleMessstelle extends IPSModule
+class CalculatedCounter extends IPSModule
 {
     public function Create()
     {

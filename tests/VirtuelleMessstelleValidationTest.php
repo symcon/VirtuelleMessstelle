@@ -8,8 +8,8 @@ class VirtuelleMessstelleValidationTest extends TestCaseSymconValidation
     {
         $this->validateLibrary(__DIR__ . '/..');
     }
-    public function testValidateVirtuelleMessstelleModule(): void
+    public function testValidateCalculatedCounterModule(): void
     {
-        $this->validateModule(__DIR__ . '/../VirtuelleMessstelle');
+        $this->validateModule(__DIR__ . '/../CalculatedCounter');
     }
 }
