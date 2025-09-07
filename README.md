@@ -8,5 +8,5 @@ _Das Modul „Smart Energy Box“ wurde in Kooperation zwischen der Symcon GmbH,
 
 Folgende Module beinhaltet das VirtuelleMessstelle Repository:
 
-- __Virtuelle Messstelle__ ([Dokumentation](https://www.symcon.de/de/service/dokumentation/modulreferenz/virtuellemessstelle))  
+- __Virtuelle Messstelle__ ([Dokumentation](https://www.symcon.de/de/service/dokumentation/modulreferenz/virtuellemessstelle/))  
 	Rechnet positive Variablenänderungen nach einstellbaren Regeln mit Veränderungen einer Hauptvariable zusammen und addiert dieses mit dem Wert eine Variable. 
